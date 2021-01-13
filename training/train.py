@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import os
+from data_loader.mtat_loader import DataLoader
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.callbacks import (
     ReduceLROnPlateau,
@@ -117,12 +118,12 @@ args = parser.parse_args()
 
 
 def load_data():
-    x_train = np.load("../dataset/mtat/npy/x_train.npy")
-    y_train = np.load("../dataset/mtat/npy/y_train.npy")
-    x_valid = np.load("../dataset/mtat/npy/x_valid.npy")
-    y_valid = np.load("../dataset/mtat/npy/y_valid.npy")
-    x_test = np.load("../dataset/mtat/npy/x_test.npy")
-    y_test = np.load("../dataset/mtat/npy/y_test.npy")
+    x_train = np.load("../dataset/mtat/my_npy_dataset/x_train.npy")
+    y_train = np.load("../dataset/mtat/my_npy_dataset/y_train.npy")
+    x_valid = np.load("../dataset/mtat/my_npy_dataset/x_valid.npy")
+    y_valid = np.load("../dataset/mtat/my_npy_dataset/y_valid.npy")
+    x_test = np.load("../dataset/mtat/my_npy_dataset/x_test.npy")
+    y_test = np.load("../dataset/mtat/my_npy_dataset/y_test.npy")
     x_train = x_train.reshape(-1, 59049, 1)
     x_valid = x_valid.reshape(-1, 59049, 1)
     x_test = x_test.reshape(-1, 59049, 1)
@@ -141,6 +142,8 @@ def lr_step_decay(epoch, lr):
 
 def train(initial_lr=0.001):
     x_train, y_train, x_valid, y_valid, x_test, y_test = load_data()
+    train_data = DataLoader(root="../dataset", split='train')
+    valid_data = DataLoader(root="../dataset", split='valid')
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
         model = music_sincnet()
@@ -161,11 +164,10 @@ def train(initial_lr=0.001):
         reduce_lr = ReduceLROnPlateau(monitor="val_loss", factor=0.2, patience=5)
 
         model.fit(
-            x_train,
-            y_train,
+            train_data,
             batch_size=16,
             epochs=200,
-            validation_data=(x_valid, y_valid),
+            validation_data=valid_data,
             callbacks=[checkpointer, reduce_lr],
         )
         model.save("my_model.h5")
