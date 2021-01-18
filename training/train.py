@@ -2,7 +2,8 @@ import numpy as np
 import math
 import os
 from data_loader.mtat_loader import DataLoader
-from tensorflow.keras.optimizers import SGD
+from data_loader.train_loader import TrainLoader
+from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow.keras.callbacks import (
     ReduceLROnPlateau,
     CSVLogger,
@@ -10,7 +11,6 @@ from tensorflow.keras.callbacks import (
     EarlyStopping,
     ModelCheckpoint,
 )
-
 # from keras.models import Model, load_model
 from model import music_sincnet
 import argparse
@@ -140,41 +140,61 @@ def lr_step_decay(epoch, lr):
     return initial_lr * math.pow(drop_rate, math.floor(epoch / epochs_drop))
 
 
-def train(initial_lr=0.001):
+def train(initial_lr=0.01):
     x_train, y_train, x_valid, y_valid, x_test, y_test = load_data()
-    train_data = DataLoader(root="../dataset", split='train')
-    valid_data = DataLoader(root="../dataset", split='valid')
-    mirrored_strategy = tf.distribute.MirroredStrategy()
-    with mirrored_strategy.scope():
-        model = music_sincnet()
-        optimizer = SGD(lr=0.001, momentum=args.momentum, decay=1e-6, nesterov=True)
-        model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=[AUC()])
-        csv_logger = CSVLogger("./training.csv", append=True)
-        checkpoint_path = "ckeckpoint/cp.cpkt"
-        checkpoint_dir = os.path.dirname(checkpoint_path)
+    train_data = TrainLoader(root="../dataset", split="train")
+    valid_data = DataLoader(root="../dataset", split="valid")
+    test_data = DataLoader(root="../dataset", split="test")
+    model = music_sincnet()
+    #optimizer = SGD(lr=initial_lr, momentum=args.momentum, decay=1e-6, nesterov=True)
+    #model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=[AUC()])
+    csv_logger = CSVLogger("./training.csv", append=True)
+    checkpoint_path = "ckeckpoint/cp.cpkt"
+    checkpoint_dir = os.path.dirname(checkpoint_path)
 
-        checkpointer = ModelCheckpoint(
-            filepath=checkpoint_path,
-            monitor="val_loss",
-            save_best_only=True,
-            save_weights_only=True,
-        )
-        lr_scheduler = LearningRateScheduler(lr_step_decay, verbose=1)
+    checkpointer = ModelCheckpoint(
+        filepath=checkpoint_path,
+        monitor="val_loss",
+        save_best_only=True,
+        save_weights_only=True,
+    )
+    lr_scheduler = LearningRateScheduler(lr_step_decay, verbose=1)
 
-        reduce_lr = ReduceLROnPlateau(monitor="val_loss", factor=0.2, patience=5)
+    reduce_lr = ReduceLROnPlateau(monitor="val_loss", factor=0.2, patience=4)
+    
+    for i in range(4):
+        if i == 0:
+            optimizer = Adam(learning_rate=1e-4)
+            epoch = 60
 
+        elif i==1:
+            optimizer = SGD(learning_rate=0.001, momentum=0.9, nesterov=True)
+            epoch = 20
+        elif i==2:
+            optimizer = SGD(learning_rate=0.0001, momentum=0.9, nesterov=True)
+            epoch=20
+
+        else:
+            optimizer = SGD(learning_rate=0.00001, momentum=0.9, nesterov=True)
+            epoch=100
+    
+        model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=[AUC(name='auc')])
         model.fit(
             train_data,
             batch_size=16,
-            epochs=200,
-            validation_data=valid_data,
-            callbacks=[checkpointer, reduce_lr],
+            epochs=epoch,
+            callbacks=[checkpointer, csv_logger],
+            validation_data = valid_data,
         )
-        model.save("my_model.h5")
+        model.save("./model/rese_model"+str(i)+".h5")
 
-    y_prob = model.predict(x_test)
-    print("test auc :", metrics.roc_auc_score(y_test, y_prob))
+    #y_prob = model.predict(x_test)
+    #print("test auc :", metrics.roc_auc_score(y_test, y_prob))
+    
+        # test code
+        print("evaluate result", model.evaluate(test_data))
 
+    
 
 if __name__ == "__main__":
     train()
