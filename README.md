@@ -11,7 +11,15 @@ Sample-level CNN Architectures for Music Auto-tagging Using Raw Waveforms [ [lin
 
 Usage
 --
-* preprocessing
+* Requirements
+<pre>
+<code>
+conda env create -n {ENV_NAME} --file environment.yaml
+conda activate {ENV_NAME}
+</code>
+</pre>
+
+* Preprocessing
 <pre>
 <code>
 python -u preprocess.py run ../dataset
@@ -19,7 +27,7 @@ python -u split.py run ../dataset
 </code>
 </pre>
 
-* training
+* Training
 <pre>
 <code>
 python train.py
