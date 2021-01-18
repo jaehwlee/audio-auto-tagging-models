@@ -6,8 +6,9 @@ ICASSP, 2018
 
 Reference 
 --
-Sample-level CNN Architectures for Music Auto-tagging Using Raw Waveforms [ [link] ](https://github.com/tae-jun/resemul)
+[keras implementation](https://github.com/tae-jun/resemul)
 
+[paper](https://arxiv.org/abs/1710.10451)
 
 Usage
 --
