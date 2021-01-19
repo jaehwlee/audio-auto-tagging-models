@@ -16,7 +16,7 @@ class TrainLoader(Sequence):
         self.on_epoch_end()
 
     def __getitem__(self, idx):
-        #indices = self.indices[idx * self.batch_size : (idx + 1) * self.batch_size]
+        # indices = self.indices[idx * self.batch_size : (idx + 1) * self.batch_size]
         npy_list = []
         tag_list = []
         for i in range(self.batch_size):
@@ -26,17 +26,16 @@ class TrainLoader(Sequence):
                 tag_list.append(np.zeros((50,)))
                 continue
 
-            
-            ix, fn = self.fl[file_index].split('\t')
+            ix, fn = self.fl[file_index].split("\t")
             npy_path = (
-                    os.path.join(self.root, "mtat", "npy", fn.split("/")[1][:-3]) + "npy"
-                    )
+                os.path.join(self.root, "mtat", "npy", fn.split("/")[1][:-3]) + "npy"
+            )
             npy = np.load(npy_path)
 
             random_idx = int(
                 np.floor(np.random.random(1) * (len(npy) - self.input_length))
             )
-            x = np.array(npy[random_idx : random_idx +self.input_length])
+            x = np.array(npy[random_idx : random_idx + self.input_length])
             tag_binary = self.binary[int(ix)]
             npy_list.append(x)
             tag_list.append(tag_binary)
@@ -60,8 +59,8 @@ class TrainLoader(Sequence):
 
     def on_epoch_end(self):
         self.indices = np.arange(len(self.fl))
-        #if self.shuffle == True:
-            #np.random.shuffle(self.indices)
+        # if self.shuffle == True:
+        # np.random.shuffle(self.indices)
 
     def __len__(self):
         return math.ceil(len(self.fl) / self.batch_size)

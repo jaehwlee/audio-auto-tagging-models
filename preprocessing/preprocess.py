@@ -8,7 +8,7 @@ import tqdm
 
 class Processor:
     def __init__(self):
-        self.fs = 22050
+        self.fs = 16000
 
     def get_paths(self, data_path):
         self.files = glob.glob(os.path.join(data_path, "mtat", "mp3", "*/*.mp3"))

@@ -129,6 +129,7 @@ class Split:
         top_50_tag_index = self.get_top50_tags()
         titles, binary = self.write_tags(top_50_tag_index)
         self.split(titles, binary)
+        """
         self.make_dataset(
             os.path.join(self.data_path, "mtat", "train.npy"),
             os.path.join(self.data_path, "mtat", "x_train.npy"),
@@ -144,6 +145,7 @@ class Split:
             os.path.join(self.data_path, "mtat", "x_test.npy"),
             os.path.join(self.data_path, "mtat", "y_test.npy"),
         )
+        """
 
 
 if __name__ == "__main__":

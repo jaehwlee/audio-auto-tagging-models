@@ -75,10 +75,7 @@ def rese_block(x, num_features, weight_decay, amplifying_ratio):
 
 
 def resemul(
-    amplifying_ratio=16,
-    drop_rate=0.5,
-    weight_decay=1e-4,
-    num_classes=50,
+    amplifying_ratio=16, drop_rate=0.5, weight_decay=1e-4, num_classes=50,
 ):
 
     # Input&Reshape
