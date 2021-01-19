@@ -16,7 +16,6 @@ from tensorflow.keras.layers import (
 )
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.models import Model
-from layer import MusicSinc1D
 
 
 def se_fn(x, amplifying_ratio):
@@ -75,26 +74,17 @@ def rese_block(x, num_features, weight_decay, amplifying_ratio):
     return x
 
 
-def music_sincnet(
-    filter_size=2501,
-    sr=22050,
-    filter_num=256,
+def resemul(
     amplifying_ratio=16,
     drop_rate=0.5,
-    weight_decay=0.0,
+    weight_decay=1e-4,
     num_classes=50,
 ):
 
     # Input&Reshape
     inp = Input(shape=(59049, 1))
-    # x = Reshape([-1, 1])(x)
-    # MusicSinc
-    # x = ZeroPadding1D(padding=(filter_size-1)//2)(inp)
-    # x = MusicSinc1D(filter_num, filter_size, sr)(x)
-    # x = BatchNormalization()(x)
-    # x = Activation('relu')(x)
     # Strided Conv
-    num_features = int(filter_num // 2)
+    num_features = 128
     x = Conv1D(
         num_features,
         kernel_size=3,
