@@ -1,14 +1,30 @@
-TF2 implementation of Sample-level CNN Architectures for Music Auto-tagging Using Raw Waveforms
+Tensorflow2 implementation of various music auto-tagging models
 ==
-Taejun Kim, Jongpil Lee, and Juhan Nam
 
-ICASSP, 2018
+<b>Evaluation of CNN-based Automatic Music Tagging Models</b> 
 
-Reference 
+Minz Won, Andres Ferraro, Dmitry Bogdanov, and Xavier Serra
+
+SMC, 2020
+
+Reference
 --
-[keras implementation](https://github.com/tae-jun/resemul)
 
-[paper](https://arxiv.org/abs/1710.10451)
+* [arxiv](https://arxiv.org/abs/2006.00751)
+
+* [pytorch](https://github.com/minzwon/sota-music-tagging-models)
+
+
+Available Models
+--
+* Sample-level CNN + Squeeze-and-excitation : Sample-level CNN Architectures for Music Auto-tagging Using Raw Waveforms, Kim et al., 2018 [arxiv](https://arxiv.org/abs/1710.10451), [code](https://github.com/tae-jun/resemul)
+
+
+Upcoming Models
+--
+* Self-attention
+* Harmonic CNN
+
 
 Usage
 --
