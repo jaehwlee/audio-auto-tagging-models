@@ -195,63 +195,6 @@ class ResNet_mtat(tf.keras.layers.Layer):
         return x
 
 
-############################################################
-# modules for joint embeddings
-#############################################################
-
-class DenseLeakyReluLayer(tf.keras.layers.Layer):
-    """A dense layer followed by a LeakyRelu layer
-    """
-    def __init__(self, n, alpha=0.3):
-        super(DenseLeakyReluLayer, self).__init__()
-        self.dense = tf.keras.layers.Dense(n, activation=None)
-        self.norm = tf.keras.layers.BatchNormalization()
-        self.lrelu = tf.keras.layers.LeakyReLU(alpha=alpha)
-
-    def call(self, input_tensor):
-        x = self.dense(input_tensor)
-        return self.lrelu(x)
-
-
-class UnitNormLayer(tf.keras.layers.Layer):
-    """Normalize vectors (euclidean norm) in batch to unit hypersphere.
-    """
-    def __init__(self):
-        super(UnitNormLayer, self).__init__()
-
-    def call(self, input_tensor):
-        norm = tf.norm(input_tensor, axis=1)
-        return input_tensor / tf.reshape(norm, [-1, 1])
-
-
-class Wave_ResNet(tf.keras.layers.Layer):
-    def __init__(self, input_channels, conv_channels=128):
-        super(Wave_ResNet, self).__init__()
-        self.num_class = 50
-        
-        self.res1 = Conv3_2d(conv_channels, 2)
-        self.res2 = Conv3_2d_resmp(conv_channels, 2)
-        self.res3 = Conv3_2d_resmp(conv_channels, 2)
-        self.res4 = Conv3_2d(conv_channels*2, 2)
-        self.res5 = Conv3_2d_resmp(conv_channels*2, 2)
-        self.res6 = Conv3_2d_resmp(conv_channels*2, (2,3))
-        self.res7 = Conv3_2d(conv_channels*2*2, (2,3))
-        # fully connected
-        self.gmp = tf.keras.layers.GlobalMaxPooling2D()
-        self.concat = tf.keras.layers.Concatenate()
-
-
-    def call(self, x, training=False):
-        # residual convolution
-        x1 = self.res1(x, training=training)
-        x2 = self.res2(x1, training=training)
-        x3 = self.res3(x2, training=training)
-        x4 = self.res4(x3, training=training)
-        x5 = self.res5(x4, training=training)
-        x6 = self.res6(x5, training=training)
-        x7 = self.res7(x6, training=training)
-
-        return self.concat([self.gmp(x5), self.gmp(x6), self.gmp(x7)])
 
 
 class Conv3_2d(tf.keras.layers.Layer):
@@ -434,13 +377,6 @@ class MusicSinc1D(Layer):
 
         return out
 
-'''
-    def compute_output_shape(self, input_shape):
-        new_size = conv_utils.conv_output_length(
-            input_shape[1], self.Filt_dim, padding="valid", stride=1, dilation=1
-        )
-        return (input_shape[0],) + (new_size,) + (self.N_filt,)
-'''
 
 def sinc(band, t_right):
     y_right = K.sin(2 * band * t_right) / (2 * band * t_right)
